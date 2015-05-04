@@ -1,6 +1,6 @@
 package Android;
 use strict;
-use vars qw($VERSION @EXPORT_OK)
+use vars qw($VERSION @EXPORT_OK);
 use vars qw(@kill_pids);
 use Carp qw(croak);
 
@@ -15,6 +15,9 @@ Android - Android system routines
 @EXPORT_OK=qw(
     launch_activity
     input_event_fh
+    decode_input_event
+    send_input_event
+    screenshot
 );
 
 =head1 Exportable functions
@@ -144,6 +147,37 @@ sub send_input_event {
     };
     system( @command );
 }
+
+=head2 C<< screenshot >>
+
+  screenshot('/sdcard/image.png');
+
+Takes a screenshot and saves it as a file.
+
+This needs root.
+
+=cut
+
+sub screenshot {
+    my( $filename, %options )= @_;
+    my @command= qw(su root screencap -p );
+    push @command, $filename;
+    system( @command );
+}
+
+=head2 C<< vibrate >>
+
+Triggers the vibrator of the device. Higher values mean longer duration.
+
+=cut
+
+sub vibrate {
+    my( $duration, %options ) = @_;
+    $options{ device } ||= '/sys/devices/virtual/timed_output/vibrator/enable';
+    open my $vibrator, '>', $options{ device }
+      or die "Couldn't write to '$options{ device }': $!";
+    print $vibrator "$duration\n";
+};
 
 1;
 
